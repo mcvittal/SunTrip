@@ -49,14 +49,23 @@ def gap_filling(dct):
             e_lon = dct[x]["lon"]
             e_lat = dct[x]["lat"]
             
+            Y = e_lat - s_lat
+            X = e_lon - s_lon
+            D = float(math.sqrt(X ** 2 + Y ** 2))
 
+            theta = math.atan(float(Y) / X)
+            
             for j in range(1, i + 1):
-                dct[z + 30 * j] = {"lon":(s_lon + j * (e_lon - s_lon)),
-                                   "lat":(s_lat + j * (e_lat - s_lat))}
+                m_lon = (D / i) * math.cos(theta) * j
+                m_lat = (D / i) * math.sin(theta) * j
+                m_lon = m_lon + s_lon
+                m_lat = m_lat + s_lat
+                
+                dct[z + 30 * j] = {"lat":m_lat, "lon":m_lon}
+
 
             
             flag = False
-            
     for k in sorted(dct.keys()):
         print "{}: {},{}".format(k, dct[k]["lon"], dct[k]["lat"])
             
