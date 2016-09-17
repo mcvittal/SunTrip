@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 '''
 Main class
 Imports everything and calls external libraries 
@@ -11,14 +11,16 @@ Licensed under GNU GPLv3
 from api_key import api 
 
 # Import external libraries
-from google.directions import GoogleDirections
+import googlemaps
 
-
-
-# Get the API key for directions 
+# Get the API key for directions from api_key.py
 google_api_key = api.directions_api_key
+    
+# Create a GoogleMapss object using the API key
+gmapobj = googlemaps.Client(key=google_api_key)
 
-
-print(google_api_key)
-
+directions = gmapobj.directions("511 albert street, waterloo ON", 
+                                "200 University Avenue, Waterloo ON",
+                                mode="driving")
+    
 
