@@ -19,19 +19,25 @@ google_api_key = api.directions_api_key
 # Create a GoogleMapss object using the API key
 gmapobj = googlemaps.Client(key=google_api_key)
 
-directions = gmapobj.directions("511 albert street, waterloo ON", 
-                                "200 University Avenue, Waterloo ON",
-                                mode="driving")
 
-# Data dictionary is stored in the first element of the list
-directions_dict = directions[0]
+def calc_directions(start, end, dir_mode):
+    directions = gmapobj.directions(start, end,  mode=dir_mode)
+    # Data dictionary is stored in the first element of the list
+    directions_dict = directions[0]
 
-journey_legs = directions_dict["legs"][0]
-print type(journey_legs)
-print journey_legs.keys()
+    journey_legs = directions_dict["legs"][0]
 
-trip_steps = journey_legs['steps']
-print (trip_steps)
+    # Troubleshooting/testing
+    #print type(journey_legs)
+    #print journey_legs.keys()
+
+    trip_steps = journey_legs['steps'][0[]
+    # print (trip_steps)
+
+calc_directions("511 albert street, waterloo ON", 
+                "200 university avenue, waterloo ON",
+                "driving")
+
 
 
 # End of file
