@@ -5,7 +5,7 @@ Imports everything and calls external libraries
 Written 17 September 2016 by Alex McVittie
 Licensed under GNU GPLv3
 '''
-
+import forecastio
 
 # Import local libraries
 import api_key as api
@@ -21,7 +21,8 @@ tl_dict = {}
 
 # Get the API key for directions from api_key.py
 google_api_key = api.directions_api_key
-    
+weather_api_key = api.weather_api_key
+
 # Create a GoogleMapss object using the API key
 gmapobj = googlemaps.Client(key=google_api_key)
 
@@ -66,15 +67,7 @@ def gap_filling(dct):
 
             
             flag = False
-    for k in sorted(dct.keys()):
-        print "{}: {},{}".format(k, dct[k]["lon"], dct[k]["lat"])
-            
-            
-
-
-
-
-
+    return dct
 
 def sum_time(leg_time, lat, lon, total_traveltime):
     global tl_dict
@@ -94,12 +87,10 @@ def sum_time(leg_time, lat, lon, total_traveltime):
     elif total_traveltime % 30 <= 15:
         total_traveltime = (hhours_now) * 30
         tl_dict[total_traveltime] = {"lat":lat, "lon":lon}
-
-
-
-
-
     return total_traveltime
+
+
+
 def calc_directions(start, end, dir_mode):
     global tl_dict
     directions = gmapobj.directions(start, end,  mode=dir_mode)
@@ -119,13 +110,19 @@ def calc_directions(start, end, dir_mode):
                                     step["end_location"]["lat"],
                                     step["end_location"]["lng"],
                                     total_traveltime)
+    #print tl_dict
+    tl_dict = gap_filling(tl_dict)
     print tl_dict
-    gap_filling(tl_dict)
-
+    for k in sorted(tl_dict.keys()):
+        lat = tl_dict[k]["lat"]
+        lon = tl_dict[k]["lon"]
+        print "{},{}".format(tl_dict[k]["lat"], tl_dict[k]["lon"])
+        forecast = forecastio.load_forecast(weather_api_key, lat, lon)
+        print(forecast.hourly().data[0])
 # Sample calc_directions method call - also for testing
 
-calc_directions("511 albert street, waterloo ON", 
-                "69 Cardill Crescent, Ottawa, ON",
+calc_directions("69 Cardill Crescent, Ottawa, ON",
+                "511 Albert Street, Waterloo, ON",
                 "driving")
 
 

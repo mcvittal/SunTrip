@@ -25,7 +25,7 @@ theta_deg = (theta * 180)/math.pi
 print theta
 print theta_deg
 
-x1 = (D /( n - 1)) * math.cos(theta)
-y1 = (D /( n - 1)) * math.sin(theta)
+x1 = (D / n ) * math.cos(theta) * 1 # the * 1 is actually gonna be * j
+y1 = (D / n ) * math.sin(theta) * 1 
 print x1
 print y1
