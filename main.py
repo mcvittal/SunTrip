@@ -113,12 +113,28 @@ def calc_directions(start, end, dir_mode):
     #print tl_dict
     tl_dict = gap_filling(tl_dict)
     print tl_dict
+    test = {}
+    x = 0
+    y = 0
     for k in sorted(tl_dict.keys()):
-        lat = tl_dict[k]["lat"]
-        lon = tl_dict[k]["lon"]
-        print "{},{}".format(tl_dict[k]["lat"], tl_dict[k]["lon"])
-        forecast = forecastio.load_forecast(weather_api_key, lat, lon)
-        print(forecast.hourly().data[0])
+        if x % 2 == 0:
+            lat = tl_dict[k]["lat"]
+            lon = tl_dict[k]["lon"]        
+            test[k]= forecastio.load_forecast(weather_api_key, lat,
+                    lon).hourly().data
+        x += 1
+
+    x = 0
+    for k in sorted(tl_dict.keys()):
+        if x % 2 == 0:
+            lat = tl_dict[k]["lat"]
+            lon = tl_dict[k]["lon"]
+            print "{},{}".format(tl_dict[k]["lat"], tl_dict[k]["lon"])
+            forecast = forecastio.load_forecast(weather_api_key, lat, lon)
+            #print(forecast.hourly().data[0])
+            print test[k][y]
+            y += 1
+        x += 1
 # Sample calc_directions method call - also for testing
 
 calc_directions("69 Cardill Crescent, Ottawa, ON",
