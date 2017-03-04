@@ -5,13 +5,15 @@ Imports everything and calls external libraries
 Written 17 September 2016 by Alex McVittie
 Licensed under GNU GPLv3
 '''
-import forecastio
 
-# Import local libraries
+# Requires pip packages: python-forecastio, googlemaps
+
+
+# Bring in API keys
 import api_key as api
 
 # Import external libraries
-import googlemaps, math
+import googlemaps, math, forecastio
 
 # Initialize variables that are to be accessed from multiple functions
 # Contains the time and location for each waypoint , rounded to the nearest
@@ -26,16 +28,18 @@ weather_api_key = api.weather_api_key
 # Create a GoogleMapss object using the API key
 gmapobj = googlemaps.Client(key=google_api_key)
 
+
+# gap_filling: Dictionary(
 def gap_filling(dct):
     existing = sorted(dct.keys())
     missing = []
-    for x in range(0, existing[-1:][0], 30):
+    for x in range(0, int(existing[-1:][0]), 30):
         if x not in existing:
             missing.append(x)
     i = 0
     flag = False
     z = 0
-    for x in range(0, max(existing), 30):
+    for x in range(0, int(max(existing)), 30):
         if x in missing and not flag:
             i += 1 
             flag = True
@@ -49,48 +53,56 @@ def gap_filling(dct):
             # Get start and end longitude and latitude 
             e_lon = dct[x]["lon"]
             e_lat = dct[x]["lat"]
-            
+
             Y = e_lat - s_lat
             X = e_lon - s_lon
             D = float(math.sqrt(X ** 2 + Y ** 2))
 
             theta = math.atan(float(Y) / X)
-            
+
             for j in range(1, i + 1):
                 m_lon = (D / i) * math.cos(theta) * j
                 m_lat = (D / i) * math.sin(theta) * j
                 m_lon = m_lon + s_lon
                 m_lat = m_lat + s_lat
-                
+
                 dct[z + 30 * j] = {"lat":m_lat, "lon":m_lon}
 
 
-            
+
             flag = False
     return dct
 
+
+# sum_time: Float Float Float Float --> Float 
+# 
 def sum_time(leg_time, lat, lon, total_traveltime):
     global tl_dict
     # Convert leg_time to minutes
     leg_time = leg_time / 60.0
-    
+
     # Flag that is triggered if the current leg time brings it close enough to
     # be at the next hour of the journey
     flag = False
     hhours_before = int(total_traveltime) / 30 
     total_traveltime += leg_time
     hhours_now = int(total_traveltime) / 30
-    if total_traveltime % 30 > 15:
+
+    if hhours_now > hhours_before:
+        tl_dict[total_traveltime] = {"lat":lat, "lon":lon}
+    return total_traveltime
+'''
+    if total_traveltime % 30 >= 25:
         total_traveltime = (hhours_now + 1) * 30
         tl_dict[total_traveltime] = {"lat":lat, "lon":lon}
         # Determine if this
-    elif total_traveltime % 30 <= 15:
+    elif total_traveltime % 30 <= 5:
         total_traveltime = (hhours_now) * 30
         tl_dict[total_traveltime] = {"lat":lat, "lon":lon}
     return total_traveltime
 
-
-
+'''
+# calc_directions: Str, Str, Str -> None 
 def calc_directions(start, end, dir_mode):
     global tl_dict
     directions = gmapobj.directions(start, end,  mode=dir_mode)
@@ -104,14 +116,16 @@ def calc_directions(start, end, dir_mode):
                   "lon":journey_legs['steps'][0]['start_location']['lng']}
     # Iterate through the steps
     for step in journey_legs['steps']:
-        # print (step.keys())
-        # print total_traveltime
+        print (step.keys())
+        print total_traveltime
         total_traveltime = sum_time(step["duration"]["value"],
                                     step["end_location"]["lat"],
                                     step["end_location"]["lng"],
                                     total_traveltime)
     #print tl_dict
     tl_dict = gap_filling(tl_dict)
+    for key in sorted(tl_dict.keys()):
+	print tl_dict[key]
     print tl_dict
     test = {}
     x = 0
@@ -137,9 +151,9 @@ def calc_directions(start, end, dir_mode):
         x += 1
 # Sample calc_directions method call - also for testing
 
-calc_directions("69 Cardill Crescent, Ottawa, ON",
-                "511 Albert Street, Waterloo, ON",
-                "driving")
+calc_directions("Square One, Mississauga, ON",
+                "Ottawa, ON",
+                "bicycling")
 
 
 
