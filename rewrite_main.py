@@ -344,6 +344,16 @@ def calc_weather(start, end, dir_mode):
 	return raw_forecast
 # End of calc_directions
 
+
+def write_to_csv(weather_dict, location="output.csv"):
+	f = open(location, "w")
+	f.write("LAT,LON,WEATHER\n")
+	for key in sorted(weather_dict.keys()):
+		f.write("{},{},{}\n".format(weather_dict[key]["lat"], weather_dict[key]["lon"], weather_dict[key]["forecast"]))
+	f.close()
+
+
+
 # ----------------------------------------------------------
 #                    Function calls
 # ----------------------------------------------------------
@@ -357,6 +367,9 @@ except:
 	start = raw_input("Enter a start location: ")
 	end = raw_input(  "Enter an end location:  ")
 	route = raw_input("Choose a transportation method.\n[1] bicycling (default)\n[2] driving\n[3] walking\n: ")
+	write = raw_input("Write to file? (Y/n):   ")
+	if write != "n" or write != "N":
+		filename = raw_input("Enter a filename. Leave blank for default (results.csv):  ")
 	try:
 		route = int(route)
 		if route == 3:
@@ -374,8 +387,15 @@ except:
 	route = "bicycling"
 
 results = calc_weather(start, end, route)
-for key in sorted(results.keys()):
-	print "{}\n{} {}".format(results[key]["forecast"], results[key]["lat"], results[key]["lon"])
+if write == "n":
+	for key in sorted(results.keys()):
+		print "{}\n{} {}".format(results[key]["forecast"], results[key]["lat"], results[key]["lon"])
+else:
+	
+	if filename == "":
+		write_to_csv(results)
+	else:
+		write_to_csv(results, filename)
 
 
 # ----------------------------------------------------------
