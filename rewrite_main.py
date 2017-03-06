@@ -345,13 +345,34 @@ def calc_weather(start, end, dir_mode):
 # End of calc_directions
 
 
+# write_to_csv: Str Str --> None
+#
+# METHOD PURPOSE
+# Writes the weather dictionary inputted to a file.
+# Default file is output.csv.
+# 
+#
+# INPUT VARIABLE PURPOSES
+# weather_dict:	Contains the output from calc_weather.
+# 
+# location:	Filename or path to output CSV file. Default is output.csv.
+#
+#	
+# OUTPUT
+# Writes to a file, nothing printed to stdout or variable outputted.
+
 def write_to_csv(weather_dict, location="output.csv"):
+	# Overwrite existing file
 	f = open(location, "w")
+	# Write header
 	f.write("LAT,LON,WEATHER\n")
+	# Loop through the weather_dict and write to file.
 	for key in sorted(weather_dict.keys()):
 		f.write("{},{},{}\n".format(weather_dict[key]["lat"], weather_dict[key]["lon"], weather_dict[key]["forecast"]))
+	# Close IO stream
 	f.close()
 
+# End of write_to_csv
 
 
 # ----------------------------------------------------------
@@ -361,9 +382,11 @@ def write_to_csv(weather_dict, location="output.csv"):
 # Call weather calculation using command line parameters
 route = ""
 try:
+	# Attempt to get command line parameters
 	start = sys.argv[1]
 	end = sys.argv[2]
 except:
+	# No parameters specified. Get them from keyboard input.
 	start = raw_input("Enter a start location: ")
 	end = raw_input(  "Enter an end location:  ")
 	route = raw_input("Choose a transportation method.\n[1] bicycling (default)\n[2] driving\n[3] walking\n: ")
@@ -384,9 +407,13 @@ except:
 try:
 	route = sys.argv[3]
 except:
+	# If no transport method is inputted as an argument, then cycling is the default.
 	route = "bicycling"
 
+# Fetch the results from calc_weather
 results = calc_weather(start, end, route)
+
+# Write to stdout if csv output is set to no
 if write == "n":
 	for key in sorted(results.keys()):
 		print "{}\n{} {}".format(results[key]["forecast"], results[key]["lat"], results[key]["lon"])
