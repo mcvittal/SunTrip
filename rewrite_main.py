@@ -15,6 +15,7 @@ Requirements
 	forecastio:	pip install python-forecastio
 	googlemaps:	pip install googlemaps
 	math:		Should be preinstalled
+	sys:		Should be preinstalled 
 
 2. API key requirements
 	Stored in api_key.py, NOT pushed to Git repository 
@@ -37,7 +38,7 @@ Requirements
 # ----------------------------------------------------------
 
 # Import external python classes/libraries
-import googlemaps, math, forecastio
+import googlemaps, forecastio, math, sys
 
 # Import the api keys as an object
 import api_key as api
@@ -111,8 +112,8 @@ def gap_filling(dct):
 	missing_times = []
 
 	# Fill the missing times list with values that need to be calculated
-	latest_time = max(existing_times)
-	for x in range(0, latest_time, 30):
+	latest_time = int(max(existing_times))
+	for x in range(0, latest_time + 1, 30):
 		if x not in existing_times:
 			missing_times.append(x)
 	
@@ -128,7 +129,7 @@ def gap_filling(dct):
 	starting_longitude = 0
 	ending_latitude = 0
 	ending_longitude = 0
-	for x in range(0, max(existing_times) + 1, 30):
+	for x in range(0, latest_time + 1, 30):
 		#Determine the starting latitude and longitude for the missing area
 		if x in missing_times and not flag:
 			# Start increasing the number of missing points
@@ -344,8 +345,44 @@ def calc_weather(start, end, dir_mode):
 # End of calc_directions
 
 # ----------------------------------------------------------
+#                    Function calls
+# ----------------------------------------------------------
+
+# Call weather calculation using command line parameters
+route = ""
+try:
+	start = sys.argv[1]
+	end = sys.argv[2]
+except:
+	start = raw_input("Enter a start location: ")
+	end = raw_input(  "Enter an end location:  ")
+	route = raw_input("Choose a transportation method.\n[1] bicycling (default)\n[2] driving\n[3] walking\n: ")
+	try:
+		route = int(route)
+		if route == 3:
+			route = "walking"
+		elif route == 2:
+			route = "driving"
+		else:
+			route = "bicycling"
+	except:
+		route = "bicycling"
+
+try:
+	route = sys.argv[3]
+except:
+	route = "bicycling"
+
+results = calc_weather(start, end, route)
+for key in sorted(results.keys()):
+	print "{}\n{} {}".format(results[key]["forecast"], results[key]["lat"], results[key]["lon"])
+
+
+# ----------------------------------------------------------
 #                         Testing
 # ----------------------------------------------------------
+
+
 
 '''
 Successful tests
@@ -367,4 +404,3 @@ for x in g:
 	print "{}: {}".format(x, f[x])
 
 '''
-
