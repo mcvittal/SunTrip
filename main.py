@@ -391,7 +391,7 @@ except:
 	end = raw_input(  "Enter an end location:  ")
 	route = raw_input("Choose a transportation method.\n[1] bicycling (default)\n[2] driving\n[3] walking\n: ")
 	write = raw_input("Write to file? (Y/n):   ")
-	if write != "n" or write != "N":
+	if write not in ["n", "N"]:
 		filename = raw_input("Enter a filename. Leave blank for default (results.csv):  ")
 	try:
 		route = int(route)
