@@ -17,8 +17,8 @@ Requirements
 1. Library requirements
     forecastio:    pip install python-forecastio
     googlemaps:    pip install googlemaps
-    math:        Should be preinstalled
-    sys:        Should be preinstalled 
+    math:          Should be preinstalled
+    sys:           Should be preinstalled 
 
 2. API key requirements
     Stored in api_key.py, NOT pushed to Git repository 
@@ -29,12 +29,12 @@ Requirements
 
     API USE CONSTRAINTS
     Weather API:     1000 requests/day free
-            $0.0001 per request after 
-    https://darksky.net/dev/ 
+                     $0.0001 per request after 
+                     https://darksky.net/dev/ 
  
     Google API:     2500 requests/day free
-            $0.50 per 1000 extra requests
-    https://developers.google.com/maps/documentation/directions/ 
+                    $0.50 per 1000 extra requests
+                    https://developers.google.com/maps/documentation/directions/ 
 '''
 # ----------------------------------------------------------
 #           Library imports, API authentications
