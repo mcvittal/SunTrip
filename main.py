@@ -77,7 +77,8 @@ tl_dict = {}
 # 
 # METHOD PURPOSE
 # Takes in a Google Directons polyline and translates it to a 
-# useable list of coordinates
+# useable list of coordinates. ["overview_polyline"]["points"]
+# contains the polyline data of a route object.
 #
 # INPUT VARIABLE PURPOSES
 # polyline_str: A byte string containing the polyline data
@@ -110,10 +111,26 @@ def decode_polyline(polyline_str):
                 changes[unit] = (result >> 1)
         lat += changes['latitude']
         lng += changes['longitude']
-        coordinates.append([lat / 100000.0, lng / 100000.0])
+        coordinates.append([lng / 100000.0, lat / 100000.0])
     return coordinates
 
 
+# assign_weather_gradient: Dictionary Float Float --> List[List [x, y, z]]
+
+
+def assign_weather_gradient(directions_obj, start_weather, end_weather):
+    coordinate_segments =  decode_polyline(directions_obj["overview_polyline"]["points"])
+    start_val = float(start_weather)
+    end_val = float(end_weather)
+    num_polylines = len(coordinate_segments)
+    for x in range (0, num_polylines):
+	if start_val >= end_val:
+       	    y = start_val - (start_val - end_val) * (x / num_polylines)
+	else:
+	    y = start_val + (end_val - start_val) * (x / num_polylines)
+    
+        num_polylines[x] = num_polylines[x].append(y)
+    
 
 # gap_filling: Dictionary --> Dictionary
 #
