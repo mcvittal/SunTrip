@@ -47,7 +47,7 @@ import googlemaps, forecastio, math, sys, os, webbrowser
 # Import the api keys as an object
 import api_key as api
 
-from subprocess import call
+import subprocess 
 
 # Set the api keys to local variables
 google_api_key = api.directions_api_key
