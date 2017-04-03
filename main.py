@@ -130,10 +130,10 @@ def assign_weather_gradient(directions_obj, start_weather, end_weather):
     end_val = float(end_weather)
     num_polylines = len(coordinate_segments)
     for x in range (0, num_polylines):
-	if start_val >= end_val:
-       	    y = start_val - (start_val - end_val) * (x / num_polylines)
-	else:
-	    y = start_val + (end_val - start_val) * (x / num_polylines)
+        if start_val >= end_val:
+                   y = start_val - (start_val - end_val) * (x / num_polylines)
+        else:
+            y = start_val + (end_val - start_val) * (x / num_polylines)
     
         coordinate_segments[x] = [coordinate_segments[x][0], 
                                   coordinate_segments[x][1],
@@ -164,23 +164,25 @@ def write_coords_to_js(weather_dict):
     data = "var points = ["
     for x in range (0, len(weather_dict)):
         if x > 0:
-            prev_hr = weather_dict[x - 1]
-            cur_hr = weather_dict[x]
-            #print prev_hr
-            #print cur_hr
- 
-            prev_coord = "{}, {}".format(prev_hr["lat"], prev_hr["lon"])
-            #print prev_coord
-            cur_coord = "{}, {}".format(cur_hr["lat"], cur_hr["lon"])
-            #print cur_coord
-            print "Calculating gradient polyline for hour {}".format(x)
-            directions = gmapobj.directions(prev_coord, cur_coord, mode=travel_mode)[0]
-            weather_start = weather_to_float(prev_hr["forecast"], prev_hr["precipChance"])
-            weather_end = weather_to_float(cur_hr["forecast"], cur_hr["precipChance"])
-            coords_with_gradient = assign_weather_gradient(directions, weather_start, weather_end)
-	    for x in coords_with_gradient:
-                #print x
-                data = data + "\n             [{}, {}, {}],".format(x[1], x[0], x[2])
+            try:
+                prev_hr = weather_dict[x - 1]
+                cur_hr = weather_dict[x]
+                #print cur_hr
+             
+                prev_coord = "{}, {}".format(prev_hr["lat"], prev_hr["lon"])
+                #print prev_coord
+                cur_coord = "{}, {}".format(cur_hr["lat"], cur_hr["lon"])
+                #print cur_coord
+                print "Calculating gradient polyline for hour {}".format(x)
+                directions = gmapobj.directions(prev_coord, cur_coord, mode=travel_mode)[0]
+                weather_start = weather_to_float(prev_hr["forecast"], prev_hr["precipChance"])
+                weather_end = weather_to_float(cur_hr["forecast"], cur_hr["precipChance"])
+                coords_with_gradient = assign_weather_gradient(directions, weather_start, weather_end)
+                for x in coords_with_gradient:
+                    #print x
+                    data = data + "\n             [{}, {}, {}],".format(x[1], x[0], x[2])
+            except:
+                pass 
     data = data[:-1] + "]"
     f.write(data)
     f.close()
