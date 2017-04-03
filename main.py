@@ -162,7 +162,7 @@ def write_coords_to_js(weather_dict):
     #print weather_dict[1]
     f = open("coords.js", "w")
     data = "var points = ["
-    for x in range (0, len(weather_dict) - 1):
+    for x in range (0, len(weather_dict)):
         if x > 0:
             prev_hr = weather_dict[x - 1]
             cur_hr = weather_dict[x]
