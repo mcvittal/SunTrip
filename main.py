@@ -65,6 +65,8 @@ gmapobj = googlemaps.Client(key=google_api_key)
 # Format: { NumMins:{"lat":Latitude, "lon":Longitude}}
 tl_dict = {} 
 
+travel_mode = ""
+
 
 # ----------------------------------------------------------
 #         Methods/Functions
@@ -120,6 +122,7 @@ def decode_polyline(polyline_str):
 
 def assign_weather_gradient(directions_obj, start_weather, end_weather):
     coordinate_segments =  decode_polyline(directions_obj["overview_polyline"]["points"])
+    print coordinate_segments
     start_val = float(start_weather)
     end_val = float(end_weather)
     num_polylines = len(coordinate_segments)
@@ -129,9 +132,60 @@ def assign_weather_gradient(directions_obj, start_weather, end_weather):
 	else:
 	    y = start_val + (end_val - start_val) * (x / num_polylines)
     
-        num_polylines[x] = num_polylines[x].append(y)
-    
+        coordinate_segments[x] = [coordinate_segments[x][0], 
+                                  coordinate_segments[x][1],
+                                  y]
+    print coordinate_segments
+    return coordinate_segments
 
+
+    
+def weather_to_float(forecast_text, precip_chance):
+    if "heavy" in forecast_text.lower():
+        return 1
+    elif "light" in forecast_text.lower():
+        return 0.6
+    elif precip_chance > 0.1 and precip_chance < 0.5:
+        return 0.25
+    elif precip_chance >= 0.5:
+        return precip_chance - 0.25
+    else:
+        return 0
+
+
+def write_coords_to_js(weather_dict):
+    global travel_mode
+    print len(weather_dict)
+    print weather_dict[1]
+    f = open("coords.js", "w")
+    data = "var points = ["
+    for x in range (0, len(weather_dict) - 1):
+        if x > 0:
+            prev_hr = weather_dict[x - 1]
+            cur_hr = weather_dict[x]
+            print prev_hr
+            print cur_hr
+ 
+            prev_coord = "{}, {}".format(prev_hr["lat"], prev_hr["lon"])
+            print prev_coord
+            cur_coord = "{}, {}".format(cur_hr["lat"], cur_hr["lon"])
+            print cur_coord
+            directions = gmapobj.directions(prev_coord, cur_coord, mode=travel_mode)[0]
+            weather_start = weather_to_float(prev_hr["forecast"], prev_hr["precipChance"])
+            weather_end = weather_to_float(cur_hr["forecast"], cur_hr["precipChance"])
+            coords_with_gradient = assign_weather_gradient(directions, weather_start, weather_end)
+	    for x in coords_with_gradient:
+                print x
+                data = data + "\n             [{}, {}, {}],".format(x[1], x[0], x[2])
+    data = data[:-1] + "]"
+    f.write(data)
+    f.close()
+            
+    
+        
+
+    
+    
 # gap_filling: Dictionary --> Dictionary
 #
 # METHOD PURPOSE
@@ -367,6 +421,7 @@ def calc_weather(start, end, dir_mode):
     # Reference global dictionary
     global tl_dict
     
+    global travel_mode
     # Initialize a variable to store the ongoing travel time
     total_traveltime = 0 
 
@@ -375,6 +430,7 @@ def calc_weather(start, end, dir_mode):
 
     # Get the legs of the journey information 
     journey_legs = directions["legs"][0]
+    travel_mode = dir_mode
     
     # Set the starting location to get weather at hour 0 of trip 
     tl_dict[0] = {"lat":journey_legs['steps'][0]['start_location']['lat'],
@@ -394,6 +450,7 @@ def calc_weather(start, end, dir_mode):
 
     # Initialize a dictionary to store the raw weather forecast along route
     raw_forecast = {}
+    raw_forecast_lst = []
     
     # Get the forecast at every hour
     for k in sorted(tl_dict.keys()):
@@ -423,8 +480,10 @@ def calc_weather(start, end, dir_mode):
                        "precipType":forecast_precip_type,
                        "windDir":forecast_windDir,
                        "windSpeed":forecast_windSpeed}
-
+            raw_forecast_lst.append(raw_forecast[k])
+    write_coords_to_js(raw_forecast_lst)
     return raw_forecast
+    
 # End of calc_directions
 
 
