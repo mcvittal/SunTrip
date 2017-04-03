@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	
+	<title>Geog 483 Leaflet Tutorial</title>
+	<!-- This tutorial is based on the official Leaflet quickstart: http://leafletjs.com/examples/quick-start/ -->
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<link rel="shortcut icon" type="image/x-icon" href="docs/images/favicon.ico" />
+
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
+	<script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+	<script src="leaflet.hotline.js"></script>
+        <script src="coords.js"></script>
+
+</head>
+<body>
+
+<style>
+    	body { margin:0; padding:0; }
+    	#mapid { position:absolute; width:100vw; height:100vh;}
+</style>
+
+<div id="mapid"</div>
+<script>
+
+	var mymap = L.map('mapid').setView([34.76733, -90.75946], 9);
+
+	var Stamen_Toner = L.tileLayer('http://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.{ext}', {
+	attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+	subdomains: 'abcd',
+	minZoom: 0,
+	maxZoom: 20,
+	ext: 'png'
+}).addTo(mymap); 
+        mymap.panTo(new L.LatLng(points[Math.floor((points.length - 1) / 2)][0], points[Math.floor((points.length - 1) / 2)][1]))
+        //mymap.setView("" + String(points[Math.floor((points.length - 1) / 2)][0]) + ", " + String(points[Math.floor((points.length - 1) / 2)][1]));
+	var hotlineLayer = L.hotline(points, {
+			min: 0,
+			max: 1,
+			palette: {
+				0.0: '#008800',
+				0.5: '#ffff00',
+				1.0: '#ff0000'
+			},
+			weight: 5,
+			outlineColor: '#000000',
+			outlineWidth: 1
+		}).addTo(mymap);
+        var group = new L.featureGroup([hotlineLayer]);
+
+
+</script>
+
+
+
+</body>
+</html>
