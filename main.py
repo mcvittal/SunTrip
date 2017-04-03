@@ -611,7 +611,7 @@ main()
 browsers = webbrowser._tryorder
 
 
-webbrowser.open("file://" + os.path.join(os.getcwd(), "samplehtml.html"))
+webbrowser.open("file://" + os.path.join(os.getcwd(), "map.html"))
 
 
 # ----------------------------------------------------------
