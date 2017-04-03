@@ -41,10 +41,12 @@ Requirements
 # ----------------------------------------------------------
 
 # Import external python classes/libraries
-import googlemaps, forecastio, math, sys
+import googlemaps, forecastio, math, sys, os
 
 # Import the api keys as an object
 import api_key as api
+
+from subprocess import call
 
 # Set the api keys to local variables
 google_api_key = api.directions_api_key
@@ -122,7 +124,7 @@ def decode_polyline(polyline_str):
 
 def assign_weather_gradient(directions_obj, start_weather, end_weather):
     coordinate_segments =  decode_polyline(directions_obj["overview_polyline"]["points"])
-    print coordinate_segments
+    #print coordinate_segments
     start_val = float(start_weather)
     end_val = float(end_weather)
     num_polylines = len(coordinate_segments)
@@ -135,7 +137,7 @@ def assign_weather_gradient(directions_obj, start_weather, end_weather):
         coordinate_segments[x] = [coordinate_segments[x][0], 
                                   coordinate_segments[x][1],
                                   y]
-    print coordinate_segments
+    #print coordinate_segments
     return coordinate_segments
 
 
@@ -155,27 +157,28 @@ def weather_to_float(forecast_text, precip_chance):
 
 def write_coords_to_js(weather_dict):
     global travel_mode
-    print len(weather_dict)
-    print weather_dict[1]
+    #print len(weather_dict)
+    #print weather_dict[1]
     f = open("coords.js", "w")
     data = "var points = ["
     for x in range (0, len(weather_dict) - 1):
         if x > 0:
             prev_hr = weather_dict[x - 1]
             cur_hr = weather_dict[x]
-            print prev_hr
-            print cur_hr
+            #print prev_hr
+            #print cur_hr
  
             prev_coord = "{}, {}".format(prev_hr["lat"], prev_hr["lon"])
-            print prev_coord
+            #print prev_coord
             cur_coord = "{}, {}".format(cur_hr["lat"], cur_hr["lon"])
-            print cur_coord
+            #print cur_coord
+            print "Calculating gradient polyline for hour {}".format(x)
             directions = gmapobj.directions(prev_coord, cur_coord, mode=travel_mode)[0]
             weather_start = weather_to_float(prev_hr["forecast"], prev_hr["precipChance"])
             weather_end = weather_to_float(cur_hr["forecast"], cur_hr["precipChance"])
             coords_with_gradient = assign_weather_gradient(directions, weather_start, weather_end)
 	    for x in coords_with_gradient:
-                print x
+                #print x
                 data = data + "\n             [{}, {}, {}],".format(x[1], x[0], x[2])
     data = data[:-1] + "]"
     f.write(data)
@@ -381,7 +384,8 @@ def sum_time(leg_time, lat, lon, total_traveltime):
     if half_hours_now > half_hours_before:        
         # total_traveltime = (half_hours_now) * 30
         tl_dict[total_traveltime] = {"lat":lat, "lon":lon}
-
+    
+    
     # Return the updated travel time
     return total_traveltime
 # End of sum_time
@@ -436,16 +440,25 @@ def calc_weather(start, end, dir_mode):
     tl_dict[0] = {"lat":journey_legs['steps'][0]['start_location']['lat'],
               "lon":journey_legs['steps'][0]['start_location']['lng']}
 
+    
+
     # Iterate through the direction steps 
     for step in journey_legs['steps']:
         total_traveltime = sum_time(step["duration"]["value"],
                         step["end_location"]["lat"],
                         step["end_location"]["lng"],
                         total_traveltime)
-
+    total_traveltime = total_traveltime + 30
+    tl_dict[total_traveltime] = {"lat":journey_legs['steps'][len(journey_legs['steps']) - 1]["end_location"]["lat"],
+                                 "lon":journey_legs['steps'][len(journey_legs['steps']) - 1]["end_location"]["lng"]}
+    total_traveltime = total_traveltime + 30
+    tl_dict[total_traveltime] = {"lat":journey_legs['steps'][len(journey_legs['steps']) - 1]["end_location"]["lat"],
+                                 "lon":journey_legs['steps'][len(journey_legs['steps']) - 1]["end_location"]["lng"]}
+    #print(tl_dict[total_traveltime])
     # Now that the actual 30 minute interval locations are recorded,
     # apply gap filling if needed.
     tl_dict = gap_filling(tl_dict)
+    tl_dict
     
 
     # Initialize a dictionary to store the raw weather forecast along route
@@ -457,6 +470,7 @@ def calc_weather(start, end, dir_mode):
         if k % 60 == 0 or k == 0:
             latitude = tl_dict[k]["lat"]
             longitude = tl_dict[k]["lon"]
+            print "Fetching hour {} weather".format(k % 60)
             forecast = forecastio.load_forecast(weather_api_key,
                                 latitude, 
                                 longitude).hourly()
@@ -585,6 +599,17 @@ def main():
 
 # Call the main function
 main()
+
+browsers = webbrowser._tryorder
+a_browser = ""
+for browser in browsers:
+    print browser
+    if "chrome" in browser or "firefox" in browser:
+        a_browser = webbrowser
+print a_browser
+
+webbrowser.get(a_browser).open("file://" + os.path.join(os.getcwd(), "samplehtml.html"))
+
 
 # ----------------------------------------------------------
 #                          Testing
