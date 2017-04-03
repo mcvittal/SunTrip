@@ -1,4 +1,5 @@
 #!/usr/bin/env python2
+# -*- coding: utf-8 -*-
 '''
 Rewrite of main.py to be more legible
 Written 3 March 2017 by Alex McVittie
@@ -41,7 +42,7 @@ Requirements
 # ----------------------------------------------------------
 
 # Import external python classes/libraries
-import googlemaps, forecastio, math, sys, os
+import googlemaps, forecastio, math, sys, os, webbrowser
 
 # Import the api keys as an object
 import api_key as api
@@ -470,7 +471,7 @@ def calc_weather(start, end, dir_mode):
         if k % 60 == 0 or k == 0:
             latitude = tl_dict[k]["lat"]
             longitude = tl_dict[k]["lon"]
-            print "Fetching hour {} weather".format(k % 60)
+            print "Fetching hour {} weather".format(int(k) / 60)
             forecast = forecastio.load_forecast(weather_api_key,
                                 latitude, 
                                 longitude).hourly()
@@ -497,7 +498,7 @@ def calc_weather(start, end, dir_mode):
             raw_forecast_lst.append(raw_forecast[k])
     write_coords_to_js(raw_forecast_lst)
     return raw_forecast
-    
+   
 # End of calc_directions
 
 
@@ -581,9 +582,14 @@ def main():
     results = calc_weather(start, end, route)
 
     # Write to stdout if csv output is set to no
+    x = 0
     if write not in ["Y", "y"] or write in ["N", "n"]:
+        print "HOURLY FORECAST"
+        print "==============="
+        
         for key in sorted(results.keys()):
-            print results[key]["forecast"]
+            print u"{} hours from now, {}, Temperature is {}° Celsius".format(x, results[key]["forecast"], results[key]["temp"])
+            x += 1
     else:
     
         if filename == "":
@@ -601,14 +607,9 @@ def main():
 main()
 
 browsers = webbrowser._tryorder
-a_browser = ""
-for browser in browsers:
-    print browser
-    if "chrome" in browser or "firefox" in browser:
-        a_browser = webbrowser
-print a_browser
 
-webbrowser.get(a_browser).open("file://" + os.path.join(os.getcwd(), "samplehtml.html"))
+
+webbrowser.open("file://" + os.path.join(os.getcwd(), "samplehtml.html"))
 
 
 # ----------------------------------------------------------
