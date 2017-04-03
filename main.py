@@ -590,7 +590,7 @@ def main():
         print "==============="
         
         for key in sorted(results.keys()):
-            print u"{} hours from now, {}, Temperature is {}° Celsius".format(x, results[key]["forecast"], results[key]["temp"])
+            print u"{} hours from now, {}".format(x, results[key]["forecast"])
             x += 1
     else:
     
