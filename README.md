@@ -22,3 +22,9 @@ For command line usage, simply call main.py and follow the prompts.
     : 1
     Write to file? (Y/n):   Y
     Enter a filename. Leave blank for default (results.csv): 
+
+## Screenshots of output
+
+![Clear weather, with forecast along route](http://i.imgur.com/BfU6RzE.png) 
+
+![Semi-bad conditions along the route](http://i.imgur.com/uh8XgEU.png)
